@@ -1,1 +1,1 @@
-# TFM_MLOps
+This is an academic exercise to experiment and learn about the Machine Learning data life cycle with MLOps methodology
