@@ -4,15 +4,15 @@ import shutil
 import kaggle
 
 
-from step import Step
+from classes.step import Step
 
 
 class Importer(Step):
-    def __init__(self, name, data_folder, kaggle_dataset_name, destination_directory_name):
+    def __init__(self, name, data_folder, kaggle_dataset_name, destination_directory):
         super().__init__(name)
         self.data_folder = data_folder
         self.kaggle_dataset_name = kaggle_dataset_name
-        self.destination_directory_name = destination_directory_name
+        self.destination_directory = destination_directory
 
     def _download_data_kaggle(self):
         # Check if the Kaggle API key was created
@@ -42,9 +42,8 @@ class Importer(Step):
         os.remove(zip_name)
         print(f"Data downloaded to {self.data_folder}")
 
-    def move_csv_files_to_directory(self, destination_directory_name):
-        destination_directory = os.path.join(
-            self.data_folder, destination_directory_name)
+    def move_csv_files_to_directory(self, destination_directory):
+        
         os.makedirs(destination_directory, exist_ok=True)
 
         # Walk through the directory tree and move all CSV files to the 'raw' directory
@@ -84,13 +83,13 @@ class Importer(Step):
     def get_files_created(self):
         return [os.path.join(self.data_folder, "raw")]
 
-    def execute(self, destination_directory_name):
+    def execute(self):
 
         # Download the data from Kaggle
         self._download_data_kaggle()
 
         # Move all CSV files to the 'raw' directory
-        self.move_csv_files_to_directory(destination_directory_name)
+        self.move_csv_files_to_directory(self.destination_directory)
 
         # Delete all files and directories except for the 'raw' directory
-        self.delete_except_directories([destination_directory_name])
+        self.delete_except_directories([self.destination_directory])

@@ -1,5 +1,5 @@
 import utils
-from importer import Importer
+from classes.importer import Importer
 
 utils.set_parent_directory_as_working_directory()
 
