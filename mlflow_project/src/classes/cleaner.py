@@ -16,6 +16,7 @@ class Cleaner(Step):
             , destination_directory
             , dict_columns_dtypes
             , null_threshold
+            , target_variable
             , max_corr
             ):
         super().__init__(name)
@@ -25,11 +26,12 @@ class Cleaner(Step):
         self.dict_columns_dtypes = dict_columns_dtypes
         self.null_threshold = null_threshold
         self.max_corr = max_corr
+        self.target_variable = target_variable
         self.data = None
 
-    def load_data(self, raw_data_path):
-        df = pd.read_csv(raw_data_path)
-        print(f"Data loaded from {raw_data_path}")
+    def load_data(self, data_path):
+        df = pd.read_csv(data_path)
+        print(f"Data loaded from {data_path}")
         self.data = df
     
     def _keep_columns(self, columns_to_keep):
@@ -120,6 +122,10 @@ class Cleaner(Step):
         self.data = self.data[columns_to_keep]
         print(f"Columns with null percentages higher than {null_threshold} dropped.")
     
+    def _drop_target_variable_nulls(self, target_variable):
+        self.data = self.data.dropna(subset=[target_variable])
+        print(f"Rows with null values in {target_variable} dropped.")
+
     def _drop_high_correlation_vars(self, max_corr):
         corr_matrix = self.data.corr().abs()
         upper = corr_matrix.where(
@@ -150,5 +156,6 @@ class Cleaner(Step):
         self._keep_columns(self.columns_to_keep)
         self._convert_columns_to_datatype(self.dict_columns_dtypes)
         self._drop_columns_nulls(self.null_threshold)
+        self._drop_target_variable_nulls(self.target_variable)
         self._drop_high_correlation_vars(self.max_corr)
         self.save_data(self.destination_directory)

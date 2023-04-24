@@ -1,19 +1,33 @@
 import pandas as pd
-import numpy as np
+import os
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
+
 
 
 
 from classes.step import Step
 
-class Feature_engineer(Step):
-    def __init__(self, name):
+class FeatureEngineer(Step):
+    def __init__(self
+                 , name
+                 , data_path
+                 , date_cols
+                 , target_variable
+                 , destination_directory
+                 ):
         super().__init__(name)
         self.data = None
-        self.target_variable = None
+        self.data_path = data_path
+        self.date_cols = date_cols
+        self.target_variable = target_variable
+        self.destination_directory = destination_directory
+       
 
+    def load_data(self, data_path, date_cols):
+        df = pd.read_csv(data_path,parse_dates=date_cols)
+        print(f"Data loaded from {data_path}")
+        self.data = df
 
 
     def _split_date_columns(self):
@@ -24,49 +38,39 @@ class Feature_engineer(Step):
             # self.data[col + '_day'] = self.data[col].dt.day
             self.data[col + '_month'] = self.data[col].dt.month
             self.data[col + '_year'] = self.data[col].dt.year
-        self.data  = self.data.drop(columns=date_cols, inplace=True)
+            print(f"Splitting {col} into {col + '_month'} and {col + '_year'}")
+        self.data.drop(columns=date_cols, inplace=True)
 
-
-
-
-
-    def _impute_missing_knn(self, target_variable, k=5):
+    def _fill_missing_values(self, exclude_cols = [None]):
         """
-        Imputes missing values in a dataset using the KNN algorithm.
-
-        Parameters:
-        df (pandas.DataFrame): The input dataset with missing values.
-        k (int): The number of nearest neighbors to use for imputation (default=5).
-
-        Returns:
-        pandas.DataFrame: The imputed dataset with no missing values.
+        Function to fill missing values in a dataframe.
+        Numeric columns are filled with their median value.
+        Categorical columns are filled with the string 'missing'.
         """
-        y = self.data[target_variable]
-        self.data.drop(columns=target_variable, inplace=True)
-
-        cont_vars = self.data.select_dtypes(include=['number']).columns.tolist()
-        cat_vars = self.data.select_dtypes(include='object').columns.tolist()
-
-        imputer = KNNImputer(n_neighbors=k)
-        self.data.loc[:, cont_vars] = imputer.fit_transform(self.data[cont_vars])
-
-        # Impute missing values in categorical variables using 'Missing' word
-        self.data.loc[:,  cat_vars] = self.data.loc[:,  cat_vars].fillna('Missing')
-
-        return pd.concat([df, y], axis=1)
-
+        for col in self.data.columns:
+            if col not in exclude_cols:
+                if self.data[col].dtype == 'object':
+                    self.data[col].fillna('Missing', inplace=True)
+                else:
+                    self.data[col].fillna(self.data[col].median(), inplace=True)
+            
 
     def _one_hot_encode(self):
 
         cat_cols = self.data.select_dtypes(include=['object']).columns
 
+        if len(cat_cols) == 0:
+            print("No categorical columns to encode")
+            return
+        
+        if self.target_variable in cat_cols:
+            cat_cols.drop(self.target_variable)
+
         # Convert categorical columns to one-hot encoding
         self.data = pd.get_dummies(self.data, columns=cat_cols, dummy_na=False)
 
-     
 
-
-    def standardize_dataframe(self):
+    def _standardize_dataframe(self):
         # Find columns with numeric data types
         numeric_cols = self.data.select_dtypes(include=[int, float]).columns.tolist()
 
@@ -77,3 +81,16 @@ class Feature_engineer(Step):
         # Convert boolean columns to 0s and 1s
         bool_cols = self.data.select_dtypes(include=bool).columns.tolist()
         self.data = self.data[bool_cols] = self.data[bool_cols].astype(int)
+
+    def save_data(self, destination_directory):
+            os.makedirs(destination_directory, exist_ok=True)
+            self.data.to_csv(destination_directory + '/clean_data.csv', index=False)
+            print(f"Data saved to {destination_directory}")
+
+    def execute(self):
+        self.load_data(self.data_path, self.date_cols)
+        self._split_date_columns()
+        self._fill_missing_values(exclude_cols=[self.target_variable])
+        self._one_hot_encode()
+        self._standardize_dataframe()
+        self.save_data(self.destination_directory)
