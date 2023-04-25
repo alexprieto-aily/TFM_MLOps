@@ -130,4 +130,5 @@ dmypy.json
 
 # csv and databases
 *.csv
+!available_features.csv
 *.sqlite
