@@ -13,6 +13,7 @@ class FeatureEngineer(Step):
                  , name
                  , data_path
                  , date_cols
+                 , true_labels
                  , target_variable
                  , destination_directory
                  ):
@@ -20,14 +21,14 @@ class FeatureEngineer(Step):
         self.data = None
         self.data_path = data_path
         self.date_cols = date_cols
+        self.true_labels = true_labels
         self.target_variable = target_variable
         self.destination_directory = destination_directory
        
 
     def load_data(self, data_path, date_cols):
-        df = pd.read_csv(data_path,parse_dates=date_cols)
-        print(f"Data loaded from {data_path}")
-        self.data = df
+            self.data = pd.read_csv(data_path,parse_dates=date_cols)
+            print(f"Data loaded from {data_path}")
 
 
     def _split_date_columns(self):
@@ -53,7 +54,11 @@ class FeatureEngineer(Step):
                     self.data[col].fillna('Missing', inplace=True)
                 else:
                     self.data[col].fillna(self.data[col].median(), inplace=True)
-            
+        print(f"Missing values filled in columns {self.data.columns}")
+
+    def _binarize_target(self, true_labels):
+        self.data[self.target_variable] = self.data[self.target_variable].isin(true_labels)
+        print(f"Target variable {self.target_variable} binarized (1 = {true_labels})")
 
     def _one_hot_encode(self):
 
@@ -68,8 +73,9 @@ class FeatureEngineer(Step):
 
         # Convert categorical columns to one-hot encoding
         self.data = pd.get_dummies(self.data, columns=cat_cols, dummy_na=False)
+        print(f"Columns encoded: {cat_cols}")
 
-
+    
     def _standardize_dataframe(self):
         # Find columns with numeric data types
         numeric_cols = self.data.select_dtypes(include=[int, float]).columns.tolist()
@@ -80,11 +86,11 @@ class FeatureEngineer(Step):
 
         # Convert boolean columns to 0s and 1s
         bool_cols = self.data.select_dtypes(include=bool).columns.tolist()
-        self.data = self.data[bool_cols] = self.data[bool_cols].astype(int)
+        self.data[bool_cols] = self.data[bool_cols].astype(int)
 
     def save_data(self, destination_directory):
             os.makedirs(destination_directory, exist_ok=True)
-            self.data.to_csv(destination_directory + '/clean_data.csv', index=False)
+            self.data.to_csv(destination_directory + '/fe_data.csv', index=False)
             print(f"Data saved to {destination_directory}")
 
     def execute(self):

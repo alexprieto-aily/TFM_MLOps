@@ -12,27 +12,27 @@ class Cleaner(Step):
             self
             , name
             , raw_data_path
+            , date_cols
             , columns_to_keep
             , destination_directory
-            , dict_columns_dtypes
             , null_threshold
             , target_variable
             , max_corr
             ):
         super().__init__(name)
         self.raw_data_path = raw_data_path
+        self.date_cols = date_cols
         self.columns_to_keep = columns_to_keep
         self.destination_directory = destination_directory
-        self.dict_columns_dtypes = dict_columns_dtypes
         self.null_threshold = null_threshold
         self.max_corr = max_corr
         self.target_variable = target_variable
         self.data = None
 
-    def load_data(self, data_path):
-        df = pd.read_csv(data_path)
-        print(f"Data loaded from {data_path}")
-        self.data = df
+    def load_data(self, data_path, date_cols):
+            self.data = pd.read_csv(data_path,parse_dates=date_cols)
+            print(f"Data loaded from {data_path}")
+          
     
     def _keep_columns(self, columns_to_keep):
         self.data = self.data[columns_to_keep]
@@ -58,45 +58,7 @@ class Cleaner(Step):
             {'Data Types': dtypes, 'Null Percentages': null_percentages})
         return check_df .join(self.data.head(3).T)
 
-    def _convert_column_to_datatype(self, column: str, dtype: Union[type, str]):
-        """
-        Converts a Pandas DataFrame column to a given data type.
-
-        Args:
-        ----
-            df : pd.DataFrame
-                Input DataFrame to modify
-            column : str
-                Column name to convert to the given data type
-            dtype : type or str
-                Data type to convert the column to, either as a Python type or a string
-                (e.g., 'float', 'int', 'datetime64', etc.)
-
-        Returns:
-        -------
-            pd.DataFrame
-                Modified DataFrame with the specified column converted to the given data type.
-        """
-        self.data[column] = self.data[column].astype(dtype)
-        print(f"Column {column} converted to {dtype}")
     
-    def _convert_columns_to_datatype(self, dict_columns_dtypes: dict):
-        """
-        Converts a list of Pandas DataFrame columns to a given data type.
-
-        Args:
-        ----
-            
-
-        Returns:
-        -------
-            pd.DataFrame
-                Modified DataFrame with the specified columns converted to the given data type.
-        """
-
-        for column, dtype in dict_columns_dtypes.items():
-            self._convert_column_to_datatype(column, dtype)
-       
     def _drop_columns_nulls(self, null_threshold: float):
         """
         Drops any column in a Pandas DataFrame with a percentage of nulls higher than a given threshold.
@@ -136,7 +98,6 @@ class Cleaner(Step):
         print(f"Columns with correlation higher than {max_corr} dropped.")
 
     def corr_heatmap(self, title=None, figsize=(10, 10), annot=True, cmap='coolwarm', linewidth=.5, fontsize=7):
-
         plt.figure(figsize=figsize)
         df_corr = self.data.corr()
         df_corr = df_corr.round(2)
@@ -152,9 +113,8 @@ class Cleaner(Step):
         print(f"Data saved to {destination_directory}")
     
     def execute(self):
-        self.load_data(self.raw_data_path)
+        self.load_data(self.raw_data_path, self.date_cols)
         self._keep_columns(self.columns_to_keep)
-        self._convert_columns_to_datatype(self.dict_columns_dtypes)
         self._drop_columns_nulls(self.null_threshold)
         self._drop_target_variable_nulls(self.target_variable)
         self._drop_high_correlation_vars(self.max_corr)
