@@ -42,10 +42,8 @@ class Importer(Step):
         os.remove(zip_name)
         print(f"Data downloaded to {self.data_folder}")
 
-    def move_csv_files_to_directory(self, destination_directory):
-        
+    def _move_csv_files_to_directory(self, destination_directory):
         os.makedirs(destination_directory, exist_ok=True)
-
         # Walk through the directory tree and move all CSV files to the 'raw' directory
         for root, dirs, files in os.walk(self.data_folder):
             for filename in files:
@@ -58,30 +56,28 @@ class Importer(Step):
         print(
             f"All CSV files in {self.data_folder} have been moved to {destination_directory}")
 
-    def delete_except_directories(self, directories_to_keep):
+    def _delete_except_directories(self, directory_to_keep):
         # Convert directories_to_keep to a set for faster lookup
-        directories_to_keep = [os.path.join(
-            self.data_folder, directory_to_keep) for directory_to_keep in directories_to_keep]
+        directory_to_keep = os.path.abspath(directory_to_keep)
 
         # Walk through the directory tree and delete all files and directories except for directories_to_keep
         for root, dirs, files in os.walk(self.data_folder, topdown=False):
             # Delete all files that are not in directories_to_keep
             for filename in files:
                 filepath = os.path.join(root, filename)
-                if root not in directories_to_keep:
+                if os.path.abspath(root) != directory_to_keep:
                     os.remove(filepath)
 
             # Delete all directories except for directories_to_keep
             for dirname in dirs:
                 dirpath = os.path.join(root, dirname)
-                if dirpath not in directories_to_keep:
-                    shutil.rmtree(dirpath)
+                if os.path.abspath(dirpath) != directory_to_keep:
+                     shutil.rmtree(dirpath)
 
         print(
-            f"All files and directories in {self.data_folder} except for {directories_to_keep} have been deleted")
+            f"All files and directories in {self.data_folder} except for {directory_to_keep} have been deleted")
 
-    def get_files_created(self):
-        return [os.path.join(self.data_folder, "raw")]
+
 
     def execute(self):
 
@@ -89,7 +85,7 @@ class Importer(Step):
         self._download_data_kaggle()
 
         # Move all CSV files to the 'raw' directory
-        self.move_csv_files_to_directory(self.destination_directory)
+        self._move_csv_files_to_directory(self.destination_directory)
 
         # Delete all files and directories except for the 'raw' directory
-        self.delete_except_directories([self.destination_directory])
+        self._delete_except_directories(self.destination_directory)
