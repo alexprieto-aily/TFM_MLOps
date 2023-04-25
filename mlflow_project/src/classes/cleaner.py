@@ -113,9 +113,11 @@ class Cleaner(Step):
         print(f"Data saved to {destination_directory}")
     
     def execute(self):
+        print(f"Executing {self.name} step")
         self.load_data(self.raw_data_path, self.date_cols)
         self._keep_columns(self.columns_to_keep)
         self._drop_columns_nulls(self.null_threshold)
         self._drop_target_variable_nulls(self.target_variable)
         self._drop_high_correlation_vars(self.max_corr)
         self.save_data(self.destination_directory)
+        print(f"Finished executing {self.name} step")
