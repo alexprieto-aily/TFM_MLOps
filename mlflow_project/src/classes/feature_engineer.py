@@ -94,6 +94,7 @@ class FeatureEngineer(Step):
             print(f"Data saved to {destination_directory}")
 
     def execute(self):
+        print(f"Executing {self.name} step")
         self.load_data(self.data_path, self.date_cols)
         self._split_date_columns()
         self._fill_missing_values(exclude_cols=[self.target_variable])
@@ -101,3 +102,4 @@ class FeatureEngineer(Step):
         self._one_hot_encode()
         self._standardize_dataframe()
         self.save_data(self.destination_directory)
+        print(f"Finished executing {self.name} step")
