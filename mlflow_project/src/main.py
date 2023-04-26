@@ -7,6 +7,12 @@ from classes.feature_engineer import FeatureEngineer
 # Cleaner
 import pandas as pd
 
+import os
+
+# Set the working directory to the parent directory
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+utils.set_parent_directory_as_working_directory()
+
 # TODO: Move this to a config file
 # Importing
 DATA_FOLDER = "./data"
@@ -31,6 +37,9 @@ date_cols=['issue_d']
 target_variable='loan_status'
 true_labels = ['Fully Paid', 'Current', 'Does not meet the credit policy. Status:Fully Paid', 'In Grace Period']
 
+
+
+
 # Import the data
 
 importer = Importer(
@@ -44,7 +53,7 @@ importer = Importer(
 # Clean the data
 cleaner = Cleaner(
     name=cleaner_name
-    , raw_data_path = RAW_DATA_PATH 
+    , data_path = RAW_DATA_PATH 
     , date_cols = date_cols
     , columns_to_keep = columns_to_keep
     , destination_directory = DATA_FOLDER
@@ -64,7 +73,6 @@ feature_engineer = FeatureEngineer(
 
 if __name__ == "__main__":
 
-    utils.set_parent_directory_as_working_directory()
     importer.execute()
     cleaner.execute()
     feature_engineer.execute()
