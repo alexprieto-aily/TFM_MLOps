@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/321377681368833294/59a6d28209364d599e6effeefdcbe791/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '321377681368833294'
+lifecycle_stage: active
+run_id: 59a6d28209364d599e6effeefdcbe791
+run_name: legendary-owl-360
+run_uuid: 59a6d28209364d599e6effeefdcbe791
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1682706257095
+status: 1
+tags: []
+user_id: unknown

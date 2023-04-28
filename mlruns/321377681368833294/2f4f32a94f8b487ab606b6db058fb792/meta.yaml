@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/321377681368833294/2f4f32a94f8b487ab606b6db058fb792/artifacts
+end_time: 1682706257368
+entry_point_name: ''
+experiment_id: '321377681368833294'
+lifecycle_stage: active
+run_id: 2f4f32a94f8b487ab606b6db058fb792
+run_name: bald-chimp-655
+run_uuid: 2f4f32a94f8b487ab606b6db058fb792
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1682706257303
+status: 4
+tags: []
+user_id: Asus

@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/321377681368833294/d5d265fb3cca42f787ede491f82a1b87/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '321377681368833294'
+lifecycle_stage: active
+run_id: d5d265fb3cca42f787ede491f82a1b87
+run_name: dazzling-hawk-822
+run_uuid: d5d265fb3cca42f787ede491f82a1b87
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1682706361597
+status: 1
+tags: []
+user_id: unknown

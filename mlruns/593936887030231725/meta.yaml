@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/593936887030231725
+creation_time: 1682705998956
+experiment_id: '593936887030231725'
+last_update_time: 1682705998956
+lifecycle_stage: active
+name: base model

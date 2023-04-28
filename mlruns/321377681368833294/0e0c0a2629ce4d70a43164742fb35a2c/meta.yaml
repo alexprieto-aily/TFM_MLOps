@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/321377681368833294/0e0c0a2629ce4d70a43164742fb35a2c/artifacts
+end_time: 1682706519350
+entry_point_name: ''
+experiment_id: '321377681368833294'
+lifecycle_stage: active
+run_id: 0e0c0a2629ce4d70a43164742fb35a2c
+run_name: treasured-horse-966
+run_uuid: 0e0c0a2629ce4d70a43164742fb35a2c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1682706508686
+status: 3
+tags: []
+user_id: Asus

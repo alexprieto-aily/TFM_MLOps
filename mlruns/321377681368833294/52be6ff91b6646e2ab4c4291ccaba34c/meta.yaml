@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/321377681368833294/52be6ff91b6646e2ab4c4291ccaba34c/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '321377681368833294'
+lifecycle_stage: active
+run_id: 52be6ff91b6646e2ab4c4291ccaba34c
+run_name: trusting-crane-863
+run_uuid: 52be6ff91b6646e2ab4c4291ccaba34c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1682706508486
+status: 1
+tags: []
+user_id: unknown

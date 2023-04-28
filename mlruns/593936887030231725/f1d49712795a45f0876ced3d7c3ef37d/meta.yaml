@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/593936887030231725/f1d49712795a45f0876ced3d7c3ef37d/artifacts
+end_time: 1682706114900
+entry_point_name: ''
+experiment_id: '593936887030231725'
+lifecycle_stage: active
+run_id: f1d49712795a45f0876ced3d7c3ef37d
+run_name: burly-moth-749
+run_uuid: f1d49712795a45f0876ced3d7c3ef37d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1682706114836
+status: 4
+tags: []
+user_id: Asus
