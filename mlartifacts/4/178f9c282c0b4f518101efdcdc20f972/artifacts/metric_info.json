@@ -1,7 +1,0 @@
-{
-  "accuracy_score_unknown_dataset": "accuracy_score(y_true=<Series>, y_pred=<ndarray>)",
-  "f1_score_unknown_dataset": "f1_score(y_true=<Series>, y_pred=<ndarray>)",
-  "precision_score_unknown_dataset": "precision_score(y_true=<Series>, y_pred=<ndarray>)",
-  "recall_score_unknown_dataset": "recall_score(y_true=<Series>, y_pred=<ndarray>)",
-  "roc_auc_score_unknown_dataset": "roc_auc_score(y_true=<Series>, y_score=<ndarray>)"
-}

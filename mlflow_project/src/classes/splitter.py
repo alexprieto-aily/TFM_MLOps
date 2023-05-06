@@ -20,31 +20,8 @@ class Splitter(IntermediateStep):
         self.y_train = None
         self.y_test = None
 
-    def load_dates_data(self, data_path, date_cols, index_col=None):
-        self.dates_data = pd.read_csv(data_path, parse_dates=date_cols, index_col=index_col
-                                      )
-        print(f"Dates data loaded from {data_path}")
 
-    def _add_date_column_to_data(self, dates_data_path, column_to_split_by):
-        """This function adds a column with the date to the data
-        """
-        # Load the dates data
-        dates_data = pd.read_csv(dates_data_path, index_col=0)
-        dates_data = dates_data[[column_to_split_by]]
-        self.data = self.data.merge(
-            dates_data, how='left', left_index=True, right_index=True)
-        self.data[self.column_to_split_by] = self.data[self.column_to_split_by].astype(
-            'datetime64[ns]')
-        print(f"Date column {column_to_split_by} added to the data")
-
-    def _filter_by_month(self, number_of_months, column_to_split_by):
-        """This function filters the data by the number of months
-        """
-        cutoff = self.data[column_to_split_by].min(
-        ) + pd.DateOffset(months=number_of_months)
-        return self.data[self.data[column_to_split_by] < cutoff]
-
-    def split_data(self, data, target_variable, test_size, random_state):
+    def set_train_test(self, data, target_variable, test_size, random_state):
        
         X = data.loc[:, data.columns != target_variable]
         y = data[target_variable]
@@ -55,24 +32,64 @@ class Splitter(IntermediateStep):
         Test size: {len(self.X_test)}
         Train size: {len(self.X_train)}""")
 
-    def split_data_filtered(self, number_of_months):
-        self._add_date_column_to_data(
-            self.dates_data_path, self.column_to_split_by)
+
+    def save_data(self, destination_directory):
+            os.makedirs(destination_directory, exist_ok=True)
+            self.X_train.to_csv(destination_directory + '/X_train.csv')
+            self.X_test.to_csv(destination_directory + '/X_test.csv')
+            self.y_train.to_csv(destination_directory + '/y_train.csv')
+            self.y_test.to_csv(destination_directory + '/y_test.csv')
+            print(f"Data saved to {destination_directory}")
+
+
+    def execute(self):
+        print(f"-------------- Executing {self.name} --------------")
+        self.load_data(self.data_path, self.date_cols, index_col=0)
+        self.load_dates_data(self.dates_data_path, self.date_cols, index_col=0)
+        self.set_train_test(self.data, self.target_variable, self.test_size, self.random_state)
+        #self.save_data(self.destination_directory)
+        print(f"--------------- {self.name} finished ---------------")
+
+    # These methods below are specific for this use case
+    def load_dates_data(self, data_path, date_cols, index_col=None):
+        self.dates_data = pd.read_csv(data_path, parse_dates=date_cols, index_col=index_col
+                                      )
+        print(f"Dates data loaded from {data_path}")
+
+
+    def _add_date_column_to_data(self, data, dates_data_path, column_to_split_by):
+        """This function adds a column with the date to the data
+        """
+        # Load the dates data
+        dates_data = pd.read_csv(dates_data_path, index_col=0)
+        dates_data = dates_data[[column_to_split_by]]
+        data = data.merge(
+            dates_data, how='left', left_index=True, right_index=True)
+        data[self.column_to_split_by] = data[self.column_to_split_by].astype(
+            'datetime64[ns]')
         
-        filtered_data = self._filter_by_month(
+        print(f"Date column {column_to_split_by} added to the data")
+        return data
+
+    def _filter_by_month(self, data, number_of_months, column_to_split_by):
+        """This function filters the data by the number of months
+        """
+        cutoff = data[column_to_split_by].min(
+        ) + pd.DateOffset(months=number_of_months)
+        return data[data[column_to_split_by] < cutoff]
+
+
+    def set_train_test_filtered(self, number_of_months):
+        filtered_data = self._add_date_column_to_data(self.data
+                                      , self.dates_data_path
+                                      , self.column_to_split_by)
+        
+        filtered_data = self._filter_by_month(  filtered_data,
             number_of_months, self.column_to_split_by)
         print(f"Data filtered by {number_of_months} months")
 
         filtered_data.drop(columns=self.column_to_split_by, inplace=True)
-        self.data.drop(columns=self.column_to_split_by, inplace=True)
-        self.split_data(filtered_data, self.target_variable, self.test_size, self.random_state)
 
-    def save_data(self, destination_directory, file_name):
-            os.makedirs(destination_directory, exist_ok=True)
-            self.data.to_csv(destination_directory + '/' + file_name)
-            print(f"Data saved to {destination_directory}")
+        self.set_train_test(filtered_data, self.target_variable, self.test_size, self.random_state)
 
-    def execute(self):
-        self.load_data(self.data_path, self.date_cols, index_col=0)
-        self.load_dates_data(self.dates_data_path, [
-                             'issue_d', 'last_pymnt_d', 'finished_d'], index_col=0)
+
