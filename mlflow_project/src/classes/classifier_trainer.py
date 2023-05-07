@@ -1,4 +1,4 @@
-from classes.step import Step
+from classes.trainer import Trainer
 
 import mlflow
 
@@ -11,7 +11,7 @@ from sklearn import metrics
 import numpy as np
 
 
-class ClassifierTrainer(Step):
+class ClassifierTrainer(Trainer):
     def __init__(
             self
             , name
@@ -21,24 +21,15 @@ class ClassifierTrainer(Step):
             , objective_metric
     ):
 
-        super().__init__(name)
-        self.params = None
-        
-        if self.params:
-            self.model_class = model_class(**self.params)
-        else:
-            self.model_class = model_class
+        super().__init__(name
+                         , model_class
+                         , random_state
+                         , splitter
+                         , objective_metric)
 
-        self.random_state = random_state
-        self.splitter = splitter
-        self.objective_metric = objective_metric
-        self.y_pred = None
-        self.results = None
+       
         
-    def set_model_params(self, params):
-        self.params = params
-        self.model_class = self.model_class.set_params(**self.params)
-
+    
     def train(self):
         self.model_class.fit(self.splitter.X_train, self.splitter.y_train)
         print(f"Model {self.name} trained")
@@ -59,7 +50,7 @@ class ClassifierTrainer(Step):
         
         print(f"Fitting grid search with {n_splits} splits and {n_repeats} repeats")
         search.fit(self.splitter.X_train, self.splitter.y_train,)
-        self.set_model_params(search.best_params_)
+        super().set_model_params(search.best_params_)
         self.model_class = search.best_estimator_
         # Print the best parameters and score
         print("Best parameters: {}".format(search.best_params_))
@@ -70,19 +61,20 @@ class ClassifierTrainer(Step):
         self.y_pred = self.model_class.predict(self.splitter.X_test)
         print(f"Model {self.name} has made the predictions")
 
-    def evaluate(self):
+    def evaluate(self, y_test, y_pred):
         """This function evaluates the model
         and returns a dictionary with the results
         """ 
         self.predict()
         results = {}
-        results['accuracy'] = metrics.accuracy_score(self.splitter.y_test, self.y_pred)
-        results['precision'] = metrics.precision_score(self.splitter.y_test, self.y_pred)
-        results['recall'] = metrics.recall_score(self.splitter.y_test, self.y_pred)
-        results['f1'] = metrics.f1_score(self.splitter.y_test, self.y_pred)
-        results['roc_auc'] = metrics.roc_auc_score(self.splitter.y_test, self.y_pred)
-        self.results = results
-        
+        results['accuracy'] = metrics.accuracy_score(y_test, y_pred)
+        results['precision'] = metrics.precision_score(y_test, y_pred)
+        results['recall'] = metrics.recall_score(y_test, y_pred)
+        results['f1'] = metrics.f1_score(y_test, y_pred)
+        results['roc_auc'] = metrics.roc_auc_score(y_test, y_pred)
+        return results
+
+ 
             
     def set_experiment_mlflow(self, experiment_name, tracking_uri='http://localhost:5000'):
         # Set the experiment name and tracking URI
@@ -122,8 +114,6 @@ class ClassifierTrainer(Step):
         # Log the evaluation metrics and self.model_class parameters in MLflow
         
 
-
-
     @staticmethod
     def delete_experiment_mlflow(experiment_name):
         client = mlflow.tracking.MlflowClient()
@@ -138,5 +128,6 @@ class ClassifierTrainer(Step):
         else:
             print(f"Experiment '{experiment_name}' is not deleted.")
             
+
     def execute(self):
         pass
