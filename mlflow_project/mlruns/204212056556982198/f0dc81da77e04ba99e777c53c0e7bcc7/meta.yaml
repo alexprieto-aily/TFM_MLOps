@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/Asus/Desktop/TFM/TFM_MLOps/mlflow_project/mlruns/204212056556982198/f0dc81da77e04ba99e777c53c0e7bcc7/artifacts
+end_time: 1683658902508
+entry_point_name: ''
+experiment_id: '204212056556982198'
+lifecycle_stage: active
+run_id: f0dc81da77e04ba99e777c53c0e7bcc7
+run_name: first_year_model_baseline
+run_uuid: f0dc81da77e04ba99e777c53c0e7bcc7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1683658902472
+status: 3
+tags: []
+user_id: Asus

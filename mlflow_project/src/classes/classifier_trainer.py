@@ -28,7 +28,6 @@ class ClassifierTrainer(Trainer):
                          , objective_metric)
 
        
-        
     
     def train(self):
         self.model_class.fit(self.splitter.X_train, self.splitter.y_train)
@@ -57,77 +56,23 @@ class ClassifierTrainer(Trainer):
         print("Best cross-validation score: {:.2f}".format(search.best_score_))
         
     
-    def predict(self):
-        self.y_pred = self.model_class.predict(self.splitter.X_test)
+    def predict(self, X_test):
+        self.y_pred = self.model_class.predict(X_test)
         print(f"Model {self.name} has made the predictions")
 
-    def evaluate(self, y_test, y_pred):
+    def evaluate(self, y_test):
         """This function evaluates the model
         and returns a dictionary with the results
         """ 
-        self.predict()
         results = {}
-        results['accuracy'] = metrics.accuracy_score(y_test, y_pred)
-        results['precision'] = metrics.precision_score(y_test, y_pred)
-        results['recall'] = metrics.recall_score(y_test, y_pred)
-        results['f1'] = metrics.f1_score(y_test, y_pred)
-        results['roc_auc'] = metrics.roc_auc_score(y_test, y_pred)
-        return results
+        results['accuracy'] = metrics.accuracy_score(y_test, self.y_pred)
+        results['precision'] = metrics.precision_score(y_test, self.y_pred)
+        results['recall'] = metrics.recall_score(y_test, self.y_pred)
+        results['f1'] = metrics.f1_score(y_test, self.y_pred)
+        results['roc_auc'] = metrics.roc_auc_score(y_test, self.y_pred)
+        self.results = results
 
  
-            
-    def set_experiment_mlflow(self, experiment_name, tracking_uri='http://localhost:5000'):
-        # Set the experiment name and tracking URI
-        mlflow.set_experiment(experiment_name)
-        mlflow.set_tracking_uri(tracking_uri)
-        client = mlflow.tracking.MlflowClient()
-        experiment = mlflow.get_experiment_by_name(experiment_name)
-        run = client.create_run(experiment.experiment_id)
-        print(f"Experiment run_id={run.info.run_id} created in tracking URI={tracking_uri}")
-
-    def log_model_mlflow(self, infer_signature): 
-
-        if infer_signature:
-            signature = mlflow.models.signature.infer_signature(self.splitter.X_train, self.splitter.y_train)
-            mlflow.sklearn.log_model(self.model_class, self.name, signature=signature)
-        else:
-            mlflow.sklearn.log_model(self.model_class, self.name)
         
-    def run_mlflow(self, run_tag, log_models=False, infer_signature=True):
-        with mlflow.start_run():
-            self.evaluate()
-            mlflow.log_param("model_name", self.name)
-            mlflow.log_param("model_params", self.model_class.get_params())
-
-            for key, value in self.results.items():
-                mlflow.log_metric('test_' + key, value)
-
-            if log_models:
-                self.log_model_mlflow(infer_signature=infer_signature)
-
-
-    def run_experiment_mlflow(self, experiment_name, log_models=False, infer_signature=True):
-        
-        self.set_experiment_mlflow(experiment_name)
-        mlflow.sklearn.autolog(log_models=log_models)
-
-        # Log the evaluation metrics and self.model_class parameters in MLflow
-        
-
-    @staticmethod
-    def delete_experiment_mlflow(experiment_name):
-        client = mlflow.tracking.MlflowClient()
-        experiment = mlflow.get_experiment_by_name(experiment_name)
-
-        if experiment is None:
-            print(f"Experiment '{experiment_name}' does not exist.")
-        elif experiment.lifecycle_stage == "deleted":
-            # Permanently delete the experiment
-            mlflow.delete_experiment(experiment.experiment_id)
-            print(f"Experiment '{experiment_name}' has been permanently deleted.")
-        else:
-            print(f"Experiment '{experiment_name}' is not deleted.")
-            
-
     def execute(self):
         pass

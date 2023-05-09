@@ -105,5 +105,4 @@ class Splitter(IntermediateStep):
                             , self.test_size
                             , self.random_state
                             )
-
     
