@@ -30,6 +30,7 @@ class ClassifierTrainer(Trainer):
        
     
     def train(self):
+        print(f"X_train shape: {self.splitter.X_train.shape}")
         self.model_class.fit(self.splitter.X_train, self.splitter.y_train)
         print(f"Model {self.name} trained")
 
@@ -48,6 +49,7 @@ class ClassifierTrainer(Trainer):
             , n_jobs=n_jobs)
         
         print(f"Fitting grid search with {n_splits} splits and {n_repeats} repeats")
+        print(f"X_train shape: {self.splitter.X_train.shape}")
         search.fit(self.splitter.X_train, self.splitter.y_train,)
         super().set_model_params(search.best_params_)
         self.model_class = search.best_estimator_
@@ -60,17 +62,20 @@ class ClassifierTrainer(Trainer):
         self.y_pred = self.model_class.predict(X_test)
         print(f"Model {self.name} has made the predictions")
 
-    def evaluate(self, y_test):
-        """This function evaluates the model
-        and returns a dictionary with the results
-        """ 
+    @staticmethod
+    def get_metrics(y_test, y_pred):
+        """This function returns a dictionary with the metrics
+        """
         results = {}
-        results['accuracy'] = metrics.accuracy_score(y_test, self.y_pred)
-        results['precision'] = metrics.precision_score(y_test, self.y_pred)
-        results['recall'] = metrics.recall_score(y_test, self.y_pred)
-        results['f1'] = metrics.f1_score(y_test, self.y_pred)
-        results['roc_auc'] = metrics.roc_auc_score(y_test, self.y_pred)
-        self.results = results
+        results['accuracy'] = metrics.accuracy_score(y_test, y_pred)
+        results['precision'] = metrics.precision_score(y_test, y_pred)
+        results['recall'] = metrics.recall_score(y_test, y_pred)
+        results['f1'] = metrics.f1_score(y_test, y_pred)
+        results['roc_auc'] = metrics.roc_auc_score(y_test, y_pred)
+        return results
+
+    def evaluate(self, y_test):
+        self.results =  self.get_metrics(y_test, self.y_pred)
 
  
         
