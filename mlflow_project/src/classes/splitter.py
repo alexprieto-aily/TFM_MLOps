@@ -1,12 +1,24 @@
 from classes.intermediate_step import IntermediateStep
 from sklearn.model_selection import train_test_split
 
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
+
 import pandas as pd
 import os
 
 class Splitter(IntermediateStep):
     def __init__(
-            self, name, data_path, date_cols, target_variable, destination_directory, dates_data_path, column_to_split_by, test_size, random_state
+            self
+            , name
+            , data_path
+            , date_cols
+            , target_variable
+            , destination_directory
+            , dates_data_path
+            , column_to_split_by
+            , test_size
+            , random_state
     ):
 
         super().__init__(name, data_path, date_cols, target_variable, destination_directory)
@@ -21,14 +33,33 @@ class Splitter(IntermediateStep):
         self.y_test = None
 
 
-    def set_train_test(self, X, y , test_size, random_state):
+    @staticmethod
+    def resample_data(X, y, random_state, over_sampling_strategy=0.5, under_sampling_strategy=0.8):
+
+        smt = SMOTE( sampling_strategy=over_sampling_strategy, random_state=random_state)
+        X, y = smt.fit_resample(X, y)
+        under = RandomUnderSampler(sampling_strategy=under_sampling_strategy)
+        X, y = under.fit_resample(X, y)
+
+        return X, y
+    
+    def set_train_test(self, X, y , test_size,  resample=True):
        
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X
+                                                                                , y
+                                                                                , test_size=test_size
+                                                                                , random_state=self.random_state)
         
+        if resample:
+            self.X_train, self.y_train = self.resample_data(self.X_train
+                                                            , self.y_train
+                                                            , random_state=self.random_state)
+            
+            print(f"Resampled data. New train size: {len(self.X_train)}")
+
         print(f"""Test and train attributes defined {test_size}.
         Test size: {len(self.X_test)}
         Train size: {len(self.X_train)}""")
-
 
     def save_data(self, destination_directory):
             os.makedirs(destination_directory, exist_ok=True)
@@ -46,7 +77,8 @@ class Splitter(IntermediateStep):
         self.set_train_test(self.data.loc[:, self.data.columns != self.target_variable]
                             , self.data[self.target_variable]
                             , self.test_size
-                            , self.random_state)
+                            , resample=False
+                     )
         #self.save_data(self.destination_directory)
         print(f"--------------- {self.name} finished ---------------")
 
@@ -103,6 +135,6 @@ class Splitter(IntermediateStep):
         self.set_train_test(X
                             , y
                             , self.test_size
-                            , self.random_state
+ 
                             )
     
