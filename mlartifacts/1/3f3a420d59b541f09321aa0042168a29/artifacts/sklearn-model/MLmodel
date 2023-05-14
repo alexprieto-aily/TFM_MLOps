@@ -14,8 +14,8 @@ flavors:
     serialization_format: cloudpickle
     sklearn_version: 1.2.2
 mlflow_version: 2.2.2
-model_uuid: 7cf96615a81c473e83c2362fbf23bcae
-run_id: 012889716d904ac3b25ed5661c57d83a
+model_uuid: ac7fa1d09c8941e1a9d01051020c50d2
+run_id: 3f3a420d59b541f09321aa0042168a29
 signature:
   inputs: '[{"name": "annual_inc", "type": "double"}, {"name": "fico_range_high",
     "type": "double"}, {"name": "installment", "type": "double"}, {"name": "int_rate",
@@ -87,4 +87,4 @@ signature:
     "long"}, {"name": "verification_status_Verified", "type": "long"}, {"name": "disbursement_method_Cash",
     "type": "long"}, {"name": "disbursement_method_DirectPay", "type": "long"}]'
   outputs: '[{"name": "loan_status", "type": "long"}]'
-utc_time_created: '2023-05-13 18:54:00.639990'
+utc_time_created: '2023-05-14 11:36:56.921970'
