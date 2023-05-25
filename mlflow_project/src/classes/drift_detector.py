@@ -14,11 +14,10 @@ class DriftDetector():
     @staticmethod
     def _run_test_each_column( sample_1, sample_2, test_function, alpha=0.05):
         drifted_columns = []
-        print(f"{test_function.__name__} test")
         for col in sample_1.columns:
             p_value = test_function(sample_1[col], sample_2[col])
             if p_value < alpha:
-                print(f"Warning: {col} has drifted")
+           
                 drifted_columns.append(col)
         return drifted_columns
     
@@ -31,7 +30,6 @@ class DriftDetector():
     def chi_square_test(sample_1, sample_2):
         results = stats.chi2_contingency(sample_1, sample_2)
         return results.pvalue
-    
 
     def univariate_input_drift(self, X_test, X_train):
         numerical_columns = X_test.select_dtypes(include=np.number).columns

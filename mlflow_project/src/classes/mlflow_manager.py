@@ -74,7 +74,7 @@ class MLflowManager:
 
         mlflow.end_run()
 
-        print(f"New metrics logged in run {run_name}")
+        print(f"{run_name}")
 
     @staticmethod
     def delete_experiment(experiment_name):
@@ -96,12 +96,12 @@ class MLflowManager:
         return experiment.experiment_id
     
     @staticmethod
-    def set_model_production(model_name, model_version):
+    def set_model_stage(model_name, model_version, stage):
         client = mlflow.tracking.MlflowClient()
         client.transition_model_version_stage(
             name=model_name,
             version=model_version,
-            stage='production'
+            stage=stage
         )
 
     @staticmethod

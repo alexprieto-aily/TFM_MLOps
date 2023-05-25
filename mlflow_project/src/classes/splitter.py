@@ -99,8 +99,6 @@ class Splitter(IntermediateStep):
             dates_data, how='left', left_index=True, right_index=True)
         data[self.column_to_split_by] = data[self.column_to_split_by].astype(
             'datetime64[ns]')
-        
-        print(f"Date column {column_to_split_by} added to the data")
         return data
 
     def _filter_by_month(self, data, from_month, to_month, column_to_split_by):
