@@ -5,7 +5,7 @@ class MLflowManager:
                  , name
                  ):
         self.name = name
-        self.tracking_uri = 'http://localhost:5000'  
+        self.tracking_uri = 'http://127.0.0.1:5000'
 
     @staticmethod
     def set_experiment(experiment_name, tracking_uri):
@@ -105,7 +105,7 @@ class MLflowManager:
         )
 
     @staticmethod
-    def load_model(model_name, model_version, tracking_uri='http://localhost:5000'):
+    def load_model(model_name, model_version, tracking_uri='http://127.0.0.1:5000'):
         mlflow.set_tracking_uri(tracking_uri)
 
         model_uri = f"models:/{model_name}/{model_version}"
@@ -114,7 +114,7 @@ class MLflowManager:
         return model
     
     @staticmethod
-    def list_registered_models(tracking_uri='http://localhost:5000'):
+    def list_registered_models(tracking_uri='http://127.0.0.1:5000'):
         client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
         models = client.list_registered_models()
         return models
