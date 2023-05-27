@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
         "multicollinierity"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "off"
 }

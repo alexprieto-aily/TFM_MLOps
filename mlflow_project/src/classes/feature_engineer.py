@@ -1,14 +1,14 @@
 import pandas as pd
 import os
-from sklearn.impute import KNNImputer
+
 from sklearn.preprocessing import StandardScaler
 
 
+from classes.intermediate_step import IntermediateStep
 
 
-from classes.step import Step
 
-class FeatureEngineer(Step):
+class FeatureEngineer(IntermediateStep):
     def __init__(self
                  , name
                  , data_path
@@ -17,19 +17,14 @@ class FeatureEngineer(Step):
                  , target_variable
                  , destination_directory
                  ):
-        super().__init__(name)
-        self.data = None
-        self.data_path = data_path
-        self.date_cols = date_cols
+        super().__init__(name
+                        , data_path
+                        , date_cols
+                        , target_variable
+                        , destination_directory)
         self.true_labels = true_labels
         self.target_variable = target_variable
         self.destination_directory = destination_directory
-       
-
-    def load_data(self, data_path, date_cols):
-            self.data = pd.read_csv(data_path,parse_dates=date_cols)
-            print(f"Data loaded from {data_path}")
-
 
     def _split_date_columns(self):
 
@@ -42,7 +37,7 @@ class FeatureEngineer(Step):
             print(f"Splitting {col} into {col + '_month'} and {col + '_year'}")
         self.data.drop(columns=date_cols, inplace=True)
 
-    def _fill_missing_values(self, exclude_cols = [None]):
+    def _fill_missing_values(self, exclude_cols=[None]):
         """
         Function to fill missing values in a dataframe.
         Numeric columns are filled with their median value.
@@ -53,12 +48,15 @@ class FeatureEngineer(Step):
                 if self.data[col].dtype == 'object':
                     self.data[col].fillna('Missing', inplace=True)
                 else:
-                    self.data[col].fillna(self.data[col].median(), inplace=True)
+                    self.data[col].fillna(
+                        self.data[col].median(), inplace=True)
         print(f"Missing values filled in columns {self.data.columns}")
 
     def _binarize_target(self, true_labels):
-        self.data[self.target_variable] = self.data[self.target_variable].isin(true_labels)
-        print(f"Target variable {self.target_variable} binarized (1 = {true_labels})")
+        self.data[self.target_variable] = self.data[self.target_variable].isin(
+            true_labels)
+        print(
+            f"Target variable {self.target_variable} binarized (1 = {true_labels})")
 
     def _one_hot_encode(self):
 
@@ -67,7 +65,7 @@ class FeatureEngineer(Step):
         if len(cat_cols) == 0:
             print("No categorical columns to encode")
             return
-        
+
         if self.target_variable in cat_cols:
             cat_cols.drop(self.target_variable)
 
@@ -75,10 +73,10 @@ class FeatureEngineer(Step):
         self.data = pd.get_dummies(self.data, columns=cat_cols, dummy_na=False)
         print(f"Columns encoded: {cat_cols}")
 
-    
     def _standardize_dataframe(self):
         # Find columns with numeric data types
-        numeric_cols = self.data.select_dtypes(include=[int, float]).columns.tolist()
+        numeric_cols = self.data.select_dtypes(
+            include=[int, float]).columns.tolist()
 
         # Standardize numeric columns using Z-score normalization
         scaler = StandardScaler()
@@ -88,16 +86,14 @@ class FeatureEngineer(Step):
         bool_cols = self.data.select_dtypes(include=bool).columns.tolist()
         self.data[bool_cols] = self.data[bool_cols].astype(int)
 
-    def save_data(self, destination_directory):
-            os.makedirs(destination_directory, exist_ok=True)
-            self.data.to_csv(destination_directory + '/fe_data.csv', index=False)
-            print(f"Data saved to {destination_directory}")
 
     def execute(self):
-        self.load_data(self.data_path, self.date_cols)
+        print(f"Executing {self.name} step")
+        self.load_data(self.data_path, self.date_cols, index_col=0)
         self._split_date_columns()
         self._fill_missing_values(exclude_cols=[self.target_variable])
         self._binarize_target(self.true_labels)
         self._one_hot_encode()
         self._standardize_dataframe()
-        self.save_data(self.destination_directory)
+        self.save_data(self.destination_directory, 'fe_data.csv')
+        print(f"Finished executing {self.name} step")

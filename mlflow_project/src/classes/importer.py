@@ -81,6 +81,7 @@ class Importer(Step):
 
     def execute(self):
 
+        print(f"Executing {self.name} step")
         # Download the data from Kaggle
         self._download_data_kaggle()
 
@@ -89,3 +90,4 @@ class Importer(Step):
 
         # Delete all files and directories except for the 'raw' directory
         self._delete_except_directories(self.destination_directory)
+        print(f"Finished executing {self.name} step")

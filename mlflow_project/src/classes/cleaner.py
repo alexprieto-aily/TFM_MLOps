@@ -1,4 +1,3 @@
-from classes.step import Step
 from typing import Union
 import pandas as pd
 import os
@@ -7,11 +6,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-class Cleaner(Step):
+
+from classes.intermediate_step import IntermediateStep
+
+
+class Cleaner(IntermediateStep):
     def __init__(
             self
             , name
-            , raw_data_path
+            , data_path
             , date_cols
             , columns_to_keep
             , destination_directory
@@ -19,20 +22,17 @@ class Cleaner(Step):
             , target_variable
             , max_corr
             ):
-        super().__init__(name)
-        self.raw_data_path = raw_data_path
-        self.date_cols = date_cols
+        super().__init__(name
+                         , data_path
+                         , date_cols
+                         , target_variable
+                         , destination_directory)
         self.columns_to_keep = columns_to_keep
         self.destination_directory = destination_directory
         self.null_threshold = null_threshold
         self.max_corr = max_corr
-        self.target_variable = target_variable
-        self.data = None
 
-    def load_data(self, data_path, date_cols):
-            self.data = pd.read_csv(data_path,parse_dates=date_cols)
-            print(f"Data loaded from {data_path}")
-          
+   
     
     def _keep_columns(self, columns_to_keep):
         self.data = self.data[columns_to_keep]
@@ -107,15 +107,24 @@ class Cleaner(Step):
         plt.title(title)
         plt.show()
 
-    def save_data(self, destination_directory):
-        os.makedirs(destination_directory, exist_ok=True)
-        self.data.to_csv(destination_directory + '/clean_data.csv', index=False)
-        print(f"Data saved to {destination_directory}")
-    
+   
+
+    def _create_dates_data(self):
+        dates_data = self.data[['term', 'issue_d','loan_status','last_pymnt_d']]
+        dates_data = dates_data[~dates_data['issue_d'].isnull()]
+        dates_data['term']=dates_data['term'].str.extract('(\d+)')
+        dates_data['term']=dates_data['term'].astype(int)
+        dates_data['finished_d'] = dates_data.apply(lambda x: x['issue_d'] + pd.DateOffset(months=x['term']), axis=1)
+        dates_data.to_csv(self.destination_directory + '/dates_data.csv')
+        print(f"Dates data saved to {self.destination_directory}")
+            
     def execute(self):
-        self.load_data(self.raw_data_path, self.date_cols)
+        print(f"Executing {self.name} step")
+        self.load_data(self.data_path, self.date_cols, None)
+        self._create_dates_data()
         self._keep_columns(self.columns_to_keep)
         self._drop_columns_nulls(self.null_threshold)
         self._drop_target_variable_nulls(self.target_variable)
         self._drop_high_correlation_vars(self.max_corr)
-        self.save_data(self.destination_directory)
+        self.save_data(self.destination_directory, 'clean_data.csv')
+        print(f"Finished executing {self.name} step")
