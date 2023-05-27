@@ -6,12 +6,26 @@ from classes.drift_detector import DriftDetector
 from classes.mlflow_manager import MLflowManager
 
 from sklearn.tree import DecisionTreeClassifier
-
-
-import numpy as np
-
+import pandas as pd
+from datetime import datetime
+import argparse
 
 utils.set_parent_directory_as_working_directory()
+
+
+# Create the argument parser
+parser = argparse.ArgumentParser()
+
+# Add optional arguments
+parser.add_argument('-n', '--experiment_name', type=str, default='experiment_decision_tree', help='Name of the experiment')
+parser.add_argument('-p', '--show_plots', default=False, action='store_true', help='Show plots')
+
+# Parse the arguments
+args = parser.parse_args()
+
+# Access the optional arguments
+experiment_name = args.experiment_name
+show_plots = args.show_plots
 
 # TODO: Move this to a config file
 # Importing
@@ -23,11 +37,15 @@ DATES_DATA_PATH = DATA_FOLDER +'/dates_data.csv'
 
 SEED = 47
 
-import pandas as pd
-from datetime import datetime
-from sklearn.ensemble import RandomForestClassifier
+# Colors for printing
+RESET = "\033[0m"
+RED = "\033[31m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+BLUE = "\033[34m" 
+BOLD = "\033[1m" 
 
-experiment_name = 'TEST_decision_tree_whole_timeseries'
+show_plots = False
 
 splitter = Splitter(
     name = "splitter"
@@ -93,7 +111,10 @@ def run_whole_timeseries(params
                          , step
                          , random_state
                          , model_class
-                         , objective_metric= 'roc_auc'):
+                         , experiment_name
+                         , show_plots
+                         , objective_metric= 'roc_auc'
+                         ):
 
     start_date = splitter.dates_data['finished_d'].min()
     start_date = datetime.strptime(start_date, '%Y-%m-%d')
@@ -105,7 +126,7 @@ def run_whole_timeseries(params
 
     while start_date < end_date:
 
-        print(f"""------------------ Iteration {current_iteration} started ------------------""")    
+        print(BOLD+YELLOW+f"""[------------------ Iteration {current_iteration} started ------------------"""+RESET)    
 
         print(f"""Training model for {start_date} to {start_date + pd.DateOffset(months=step)}""")
         splitter.set_train_test_filtered(number_of_months=months)
@@ -134,13 +155,29 @@ def run_whole_timeseries(params
             input_target_drift(splitter, step, months)
 
             # Concept drift
-            X_next_year, y_next_year = splitter.x_y_filter_by_month(from_month=months, to_month=months+step)
+            X_next_year, y_next_year = splitter.x_y_filter_by_month(from_month=months
+                                                                    , to_month=months+step)
 
-            assert len(X_next_year) > 0 , 'No more data for next year'
+            if len(X_next_year) == 0:
+                print(RED+'No more data for next year'+RESET)
+                break
 
-            prod = MLflowManager.load_model(prod_model_names[-1], '1', 'http://localhost:5000')
+            prod = MLflowManager.load_model(prod_model_names[-1], '1')
             challenger = trainer.model_class
 
+            print(GREEN+"Showing trimestral metrics for next year"+RESET)
+            metrics = DriftDetector.predict_by_period(start_period = months
+                  , end_period = months+step
+                  , step = 3
+                  , model_prod = prod
+                  , model_challenger = challenger
+                  , objective_metric = 'roc_auc'
+                  , splitter = splitter)
+            
+            if show_plots:               
+                DriftDetector.plot_metric(metrics, 'roc_auc')
+
+            print(GREEN+"Choosing best model after 1 year"+RESET)
             prod_model_metrics, challenger_model_metrics, is_challenger = choose_prod_challenger_model(prod
                                                                              , challenger
                                                                              , X_next_year
@@ -196,12 +233,15 @@ def run_whole_timeseries(params
 
         months += step  
         start_date = start_date + pd.DateOffset(months=step)
-        print(f"""------------------ Iteration {current_iteration} finished ------------------\n""")
+        print(BOLD+YELLOW+f"""------------------ Iteration {current_iteration} finished ------------------\n"""+RESET)
         current_iteration += 1 
 
     return prod_model_metrics, prod_model_names
 
+
+
 if __name__ == "__main__":
+
     prod_model_metrics, prod_model_names = run_whole_timeseries(
                         params={'max_depth': 7}
                         , splitter=splitter
@@ -209,4 +249,9 @@ if __name__ == "__main__":
                         , step=12
                         , random_state=SEED
                         , model_class=DecisionTreeClassifier()
+                        , experiment_name = experiment_name
+                        , show_plots=show_plots
                         )
+    
+    pd.DataFrame(prod_model_metrics).to_csv("prod_model_metrics.csv")
+    pd.DataFrame(prod_model_names).to_csv("prod_model_names.csv")

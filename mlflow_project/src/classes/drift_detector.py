@@ -1,6 +1,9 @@
 from scipy import stats
 import numpy as np
+import matplotlib.pyplot as plt
+
 from classes.splitter import Splitter
+from classes.classifier_trainer import ClassifierTrainer
 
 class DriftDetector():
     def __init__(
@@ -51,3 +54,36 @@ class DriftDetector():
 
         return drifted_columns
 
+    @staticmethod
+    def predict_by_period(start_period
+                        , end_period
+                        , step
+                        , model_prod
+                        , model_challenger
+                        , objective_metric
+                        , splitter):
+
+        metrics = {}
+        while start_period < end_period:
+            X_next_period, y_next_period = splitter.x_y_filter_by_month(from_month=start_period, to_month=start_period + step)
+            y_preds_prod = model_prod.predict(X_next_period)
+            y_preds_challenger = model_challenger.predict(X_next_period)
+            metrics_prod = ClassifierTrainer.get_metrics(y_next_period, y_preds_prod)
+            metrics_challenger = ClassifierTrainer.get_metrics(y_next_period, y_preds_challenger)
+        
+            metrics[start_period] = {'Production model': metrics_prod, 'Challenger model': metrics_challenger}
+            print(f"Production model {objective_metric}: {metrics_prod[objective_metric]}")
+            print(f"Challenger model {objective_metric}: {metrics_challenger[objective_metric]}\n")
+            start_period += step
+
+        return dict(sorted(metrics.items()))
+    
+    @staticmethod
+    def plot_metric(metrics, objective_metric):
+        plt.plot(list(metrics.keys()), [x['Production model'][objective_metric] for x in metrics.values()], label='Production model')
+        plt.plot(list(metrics.keys()), [x['Challenger model'][objective_metric] for x in metrics.values()], label='Challenger model')
+        plt.xlabel('Month')
+        plt.ylabel(objective_metric)
+        plt.title(f'{objective_metric} by month for production and challenger models')
+        plt.legend()
+        plt.show()

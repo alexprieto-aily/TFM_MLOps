@@ -123,7 +123,6 @@ class Splitter(IntermediateStep):
                                               , to_month
                                               , self.column_to_split_by)
         filtered_data = filtered_data.drop(self.column_to_split_by, axis=1)
-        print (f"Data filtered by {from_month} and {to_month} months")
         return filtered_data.loc[:, filtered_data.columns != self.target_variable], filtered_data[self.target_variable]
 
 

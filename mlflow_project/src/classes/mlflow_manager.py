@@ -1,4 +1,6 @@
 import mlflow
+import warnings
+warnings.filterwarnings("ignore")
 
 class MLflowManager:
     def __init__(self
@@ -12,7 +14,7 @@ class MLflowManager:
         # Set the experiment name and tracking URI
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment(experiment_name)
-        print(f"Experiment {experiment_name} created in tracking URI {tracking_uri}")
+
     
     @staticmethod
     def log_model( trainer, infer_signature): 
