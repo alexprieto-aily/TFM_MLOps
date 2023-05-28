@@ -18,3 +18,4 @@ dependencies:
     - kaggle==1.5.13
     - numpy==1.23.5
     - imblearn
+    - virtualenv
