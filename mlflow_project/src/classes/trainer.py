@@ -3,17 +3,16 @@ from abc import abstractmethod
 
 class Trainer(Step):
     def __init__(
-            self
-            , name
-            , model_class
-            , random_state
-            , splitter
-            , objective_metric
+            self,
+            name: str,
+            model_class,
+            random_state: int,
+            splitter,
+            objective_metric: str
     ):
-
         super().__init__(name)
         self.params = None
-        
+
         if self.params:
             self.model_class = model_class(**self.params)
         else:
@@ -26,22 +25,44 @@ class Trainer(Step):
         self.results = None
 
     def set_model_params(self, params):
+        """
+        Sets the parameters for the model.
+
+        Args:
+            params: The parameters to be set for the model.
+        """
         self.params = params
         self.model_class = self.model_class.set_params(**self.params)
 
     @abstractmethod
     def train(self):
+        """
+        Trains the model.
+        """
         pass
 
     @abstractmethod
     def predict(self):
+        """
+        Generates predictions using the trained model.
+        """
         pass
 
     @abstractmethod
     def evaluate(self):
+        """
+        Evaluates the model performance.
+        """
         pass
 
     def execute(self):
+        """
+        Executes the trainer by calling the train, predict, and evaluate methods.
+        Returns the results.
+
+        Returns:
+            The results of the trainer.
+        """
         self.train()
         self.predict()
         self.evaluate()

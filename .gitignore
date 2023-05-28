@@ -132,3 +132,6 @@ dmypy.json
 *.csv
 !available_features.csv
 *.sqlite
+
+# not sure whate these are but i don't need them
+.DS_Store
