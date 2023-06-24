@@ -76,7 +76,7 @@ class MLflowManager:
 
         print(f"Run completed")
 
-    def log_new_metrics(self, run_name: str, experiment_name: str, metrics: dict, prefix: str):
+    def log_new_metrics(self, run_name: str, experiment_name: str, metrics: dict, prefix: str = ''):
         """
         Logs new metrics for an existing MLflow run.
 
