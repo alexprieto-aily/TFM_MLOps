@@ -16,7 +16,7 @@ For this project once the environment is set up, you need to start the mlflow se
 mlflow server --backend-store-uri sqlite:///mydb.sqlite
 ```
 
-## Steps to follow once everything is set up
+# Steps to follow once everything is set up
 
 - 1 go to mlflow_project folder in your terminal
 
