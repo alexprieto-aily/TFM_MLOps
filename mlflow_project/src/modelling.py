@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 DATA_FOLDER = "./data"
 FE_DATA_PATH = DATA_FOLDER + '/fe_data.csv'
 DATES_DATA_PATH = DATA_FOLDER + '/dates_data.csv'
-SEED = 47
+SEED = 46
 
 # Colors for printing
 RESET = "\033[0m"
@@ -279,7 +279,7 @@ def main():
                         , mlflow_manager=mlflow_manager
                         , step=12
                         , random_state=SEED
-                        , model_class=DecisionTreeClassifier()
+                        , model_class=DecisionTreeClassifier(random_state=SEED)
                         , experiment_name = experiment_name
                         , show_plots=show_plots
                         )
