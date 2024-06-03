@@ -112,7 +112,9 @@ class Cleaner(IntermediateStep):
         Args:
             max_corr (float): The maximum correlation value for dropping highly correlated columns.
         """
-        corr_matrix = self.data.corr().abs()
+        # select only numerical columns in self.data
+        numerical_columns = self.data.select_dtypes(include=np.number).columns
+        corr_matrix = self.data[numerical_columns].corr().abs()
         upper = corr_matrix.where(
             np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
         to_drop = [column for column in upper.columns if any(
