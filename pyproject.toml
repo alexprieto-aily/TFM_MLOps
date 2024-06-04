@@ -21,6 +21,7 @@ numpy = "^1.23.5"
 imblearn = "*"
 virtualenv = "*"
 evidently = "^0.4.25"
+jupyter = "^1.0.0"
 
 
 [build-system]
