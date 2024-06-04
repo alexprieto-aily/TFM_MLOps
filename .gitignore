@@ -135,3 +135,7 @@ dmypy.json
 
 # not sure whate these are but i don't need them
 .DS_Store
+
+
+.idea
+.vscode
