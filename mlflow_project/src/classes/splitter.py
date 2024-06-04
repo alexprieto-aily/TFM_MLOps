@@ -112,7 +112,8 @@ class Splitter(IntermediateStep):
         """
         print(f"-------------- Executing {self.name} --------------")
         self.load_data(self.data_path, self.date_cols, index_col=0)
-        self.load_dates_data(self.dates_data_path, self.date_cols, index_col=0)
+        self.data.columns= self.data.columns.str.replace(' ', '_')
+        self.load_dates_data(self.dates_data_path, self.date_cols, index_col=0)  
         self.set_train_test(self.data.loc[:, self.data.columns != self.target_variable]
                             , self.data[self.target_variable]
                             , self.test_size

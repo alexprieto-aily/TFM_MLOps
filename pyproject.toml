@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "tfm_env_poetry"
+version = "0.1.0"
+description = ""
+authors = ["Alejandro Prieto Velasco"]
+
+[tool.poetry.dependencies]
+python = "^3.10.10"
+jupyter-client= "*"
+jupyter-core= "*"
+ipykernel= "*"
+ipython= "*"
+pandas= "*"
+
+mlflow= "*"
+scikit-learn= "*"
+matplotlib= "*"
+seaborn= "*"
+kaggle= "*"
+numpy= "*"
+imblearn= "*"
+virtualenv= "*"
+chardet= "*"
+bentoml= "*"
+fastapi= "*"
+
+[virtualenvs]
+in-project = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

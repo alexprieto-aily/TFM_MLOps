@@ -1,0 +1,24 @@
+service: "service:LoanClassificationService"
+
+#docker:
+#    system_packages:
+#        - git
+#    base_image: 
+#    dockerfile_template: "./Dockerfile.template"
+#
+#
+#   setup_script: "./setup.sh"
+#
+
+include:
+
+    - service.py
+
+python:
+    packages:
+        - pandas
+        #- "git"
+        - mlflow
+        - scikit-learn
+        - pydantic
+

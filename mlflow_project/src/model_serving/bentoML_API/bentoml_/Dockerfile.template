@@ -1,0 +1,20 @@
+{% extends bento_base_template %}
+{% block SETUP_BENTO_COMPONENTS %}
+{{ super() }}
+
+# Install Git
+RUN apt-get update
+RUN apt-get install -y git
+
+{% endblock %}
+{% block SETUP_BENTO_ENVARS %}
+{{ super() }}
+
+# define environment variables
+ENV COMPANY_PREFIX=COMPANY
+ENV COMPANY_ENV=dev
+ENV COMPANY_TENANT=coreproduct
+ENV AWS_REGION=eu-central-1
+ENV AWS_PROFILE=aws-infrastructure
+
+{% endblock %}
