@@ -24,6 +24,9 @@ evidently = "^0.4.25"
 jupyter = "^1.0.0"
 
 
+[tool.poetry.group.dev.dependencies]
+setuptools = "^70.0.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
