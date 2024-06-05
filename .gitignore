@@ -158,3 +158,5 @@ celerybeat-schedule
 # IDE settings
 .vscode/
 .idea/
+
+.html
